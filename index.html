@@ -47,13 +47,14 @@ video{width:100%;max-height:55vh;background:#000;border-radius:12px;object-fit:c
 .tx,#me{display:none}
 .hd .tab,.hd .btn{width:48px;height:48px;padding:0;border-radius:8px;font-size:24px;display:flex;align-items:center;justify-content:center}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.sb{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:3;background:var(--bg);padding-bottom:8px}
 .hide{display:none}
 .mut{color:var(--mut);font-size:13px}
 </style></head><body>
 <header class="top hd"><h1>PokéKolekcja</h1><div class="tb"><button class="tab a" id="n0" title="Kolekcja">📚<span class="tx"> Kolekcja</span></button><button class="tab" id="n1" title="Skanuj">📷<span class="tx"> Skanuj</span></button><button class="btn" id="pk" title="Osoby">👤 <span id="me"></span></button><button class="btn" id="lk" title="Logowanie">🔑</button></div></header>
 <section id="c">
-<div id="cnt" class="mut"></div><div class="bar"><i id="pb"></i></div>
-<input id="q" placeholder="Szukaj nazwy lub numeru" autocomplete="off">
+<div class="sb"><div id="cnt" class="mut"></div><div class="bar"><i id="pb"></i></div>
+<input id="q" placeholder="Szukaj nazwy lub numeru" autocomplete="off"></div>
 <div class="grid" id="g"></div>
 </section>
 <section id="s" class="hide">
