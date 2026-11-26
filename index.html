@@ -29,7 +29,8 @@ video{width:100%;max-height:55vh;background:#000;border-radius:12px;object-fit:c
 .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--fg);font-size:15px}
 #m{position:fixed;inset:0;background:#0007;display:none;align-items:flex-end;justify-content:center;z-index:5}
 #m.o{display:flex}
-#sh{background:var(--card);width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+#sh{background:var(--card);width:100%;height:100%;overflow:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(18px + env(safe-area-inset-bottom,0px))}
+#ts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(80px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:20px;z-index:9;display:none;max-width:90%;text-align:center}
 .v{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:8px;padding:14px;border-radius:12px;border:2px solid var(--bd);background:var(--bg);color:var(--fg);font-size:16px}
 .v.y{border-color:var(--ac);background:var(--on)}
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px}.top h1{margin:0}
@@ -62,6 +63,7 @@ video{width:100%;max-height:55vh;background:#000;border-radius:12px;object-fit:c
 <div id="m"><div id="sh"></div></div>
 <div id="p"><div id="pb2"></div></div>
 <div id="d"><div id="db"></div></div>
+<div id="ts"></div>
 <script>
 const G=[
 `bulbasaur ivysaur venusaur charmander charmeleon charizard squirtle wartortle blastoise caterpie metapod butterfree weedle kakuna beedrill pidgey pidgeotto pidgeot rattata raticate spearow fearow ekans arbok pikachu raichu sandshrew sandslash nidoran-f nidorina nidoqueen nidoran-m nidorino nidoking clefairy clefable vulpix ninetales jigglypuff wigglytuff zubat golbat oddish gloom vileplume paras parasect venonat venomoth diglett dugtrio meowth persian psyduck golduck mankey primeape growlithe arcanine poliwag poliwhirl poliwrath abra kadabra alakazam machop machoke machamp bellsprout weepinbell victreebel tentacool tentacruel geodude graveler golem ponyta rapidash slowpoke slowbro magnemite magneton farfetchd doduo dodrio seel dewgong grimer muk shellder cloyster gastly haunter gengar onix drowzee hypno krabby kingler voltorb electrode exeggcute exeggutor cubone marowak hitmonlee hitmonchan lickitung koffing weezing rhyhorn rhydon chansey tangela kangaskhan horsea seadra goldeen seaking staryu starmie mr-mime scyther jynx electabuzz magmar pinsir tauros magikarp gyarados lapras ditto eevee vaporeon jolteon flareon porygon omanyte omastar kabuto kabutops aerodactyl snorlax articuno zapdos moltres dratini dragonair dragonite mewtwo mew`,
@@ -94,18 +96,29 @@ function render(){
   const n=Object.keys(own).length;$('cnt').textContent=`Zebrane: ${n} / ${T}`;$('pb').style.width=(n/T*100)+'%';
   $('g').innerHTML=match($('q').value).map(tile).join('');
 }
+let dr=0;
 function open(i){
-  stop();
+  stop();dr=own[i]||0;
   const sh=$('sh');
-  sh.innerHTML=`<h1>#${i} ${cap(N[i-1])}</h1><img alt="" src="${art(i)}" style="display:block;margin:0 auto;width:min(55vw,240px);height:auto"><div class="mut">Zaznacz, jakie karty masz:</div>`+V.map((v,k)=>`<button class="v${has(i,k)?' y':''}" data-k="${k}"><span>${v}</span><span>${has(i,k)?'✓ mam':'—'}</span></button>`).join('') +`<div class="mut" style="margin-top:10px">${who(i)}</div><button class="btn" id="cl" style="width:100%;margin-top:12px">Gotowe</button>`;
+  sh.innerHTML=`<div class="top"><h1>#${i} ${cap(N[i-1])}</h1><button class="btn" id="x">✕</button></div><img alt="" src="${art(i)}" style="display:block;margin:0 auto;width:min(55vw,240px);height:auto"><div class="mut">Zaznacz, jakie karty masz:</div>`+V.map((v,k)=>`<button class="v${(dr>>k)&1?' y':''}" data-k="${k}"><span>${v}</span><span>${(dr>>k)&1?'✓ mam':'—'}</span></button>`).join('') +`<div class="mut" style="margin-top:10px">${who(i)}</div><button class="btn" id="cl" style="width:100%;margin-top:12px;background:var(--ac);color:#fff;border-color:var(--ac)">Gotowe – zapisz</button>`;
   sh.dataset.i=i;$('m').classList.add('o');
 }
 function close(){$('m').classList.remove('o');render();if(tab==1)perm()}
 $('sh').onclick=e=>{
-  if(e.target.id==='cl')return close();
-  const b=e.target.closest('.v');if(!b)return;
-  const i=+$('sh').dataset.i,k=+b.dataset.k;
-  own[i]=(own[i]||0)^(1<<k);if(!own[i])delete own[i];save();open(i);
+  const t=e.target;
+  if(t.id==='x')return close();
+  if(t.id==='cl'){
+    const i=+$('sh').dataset.i;
+    if((own[i]||0)!==dr){
+      if(dr)own[i]=dr;else delete own[i];
+      persist();clearTimeout(sy);
+      if(gh()&&tok())push();else toast('Zapisano na tym telefonie');
+    }
+    return close();
+  }
+  const b=t.closest('.v');if(!b)return;
+  const k=+b.dataset.k;dr^=1<<k;
+  b.classList.toggle('y',!!((dr>>k)&1));b.lastChild.textContent=((dr>>k)&1)?'✓ mam':'—';
 };
 $('m').onclick=e=>{if(e.target.id==='m')close()};
 $('g').onclick=e=>{const t=e.target.closest('.t');if(t)open(+t.dataset.i)};
@@ -132,7 +145,8 @@ async function start(){
 $('cb').onclick=start;$('ob').onclick=()=>window.open(location.href,'_blank');$('sw').onclick=()=>{facing=facing==='environment'?'user':'environment';start()};
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const label=()=>{$('me').textContent=me};
-const note=t=>{const e=$('pn');if(e)e.textContent=t};
+let tt;function toast(t){const e=$('ts');e.textContent=t;e.style.display='block';clearTimeout(tt);tt=setTimeout(()=>e.style.display='none',2500)}
+const note=t=>{const e=$('pn');if(e)e.textContent=t;else toast(t)};
 const who=i=>{const o=Object.keys(P).filter(n=>n!==me&&P[n][i]).map(n=>esc(n)+': '+V.filter((_,k)=>(P[n][i]>>k)&1).join(', '));return o.length?'Mają: '+o.join(' · '):'Nikt inny jeszcze tego nie ma'};
 const gh=()=>{let r=localStorage.getItem('repo')||'';if(!r&&location.hostname.endsWith('github.io'))r=location.hostname.split('.')[0]+'/'+location.pathname.split('/')[1];return r};
 const tok=()=>localStorage.getItem('tok')||'';
