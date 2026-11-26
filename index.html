@@ -38,11 +38,14 @@ video{width:100%;max-height:55vh;background:#000;border-radius:12px;object-fit:c
 #pb2{background:var(--card);width:100%;max-width:520px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
 .pp{display:flex;justify-content:space-between;width:100%;padding:12px;margin-top:6px;border-radius:10px;border:2px solid var(--bd);background:var(--bg);color:var(--fg);font-size:15px}
 .pp.y{border-color:var(--ac);background:var(--on)}
+#d{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:7;padding:16px}
+#d.o{display:flex}
+#db{background:var(--card);border-radius:16px;padding:18px;width:100%;max-width:360px}
 .hide{display:none}
 .mut{color:var(--mut);font-size:13px}
 </style></head><body>
 <section id="c">
-<div class="top"><h1>PokéKolekcja</h1><button class="btn" id="pk">👤 <span id="me"></span></button></div>
+<div class="top"><h1>PokéKolekcja</h1><div style="display:flex;gap:6px"><button class="btn" id="pk">👤 <span id="me"></span></button><button class="btn" id="lk">🔑</button></div></div>
 <div id="cnt" class="mut"></div><div class="bar"><i id="pb"></i></div>
 <input id="q" placeholder="Szukaj nazwy lub numeru" autocomplete="off">
 <div class="grid" id="g"></div>
@@ -58,6 +61,7 @@ video{width:100%;max-height:55vh;background:#000;border-radius:12px;object-fit:c
 <nav><button id="n0" class="a">📚 Kolekcja</button><button id="n1">📷 Skanuj</button></nav>
 <div id="m"><div id="sh"></div></div>
 <div id="p"><div id="pb2"></div></div>
+<div id="d"><div id="db"></div></div>
 <script>
 const G=[
 `bulbasaur ivysaur venusaur charmander charmeleon charizard squirtle wartortle blastoise caterpie metapod butterfree weedle kakuna beedrill pidgey pidgeotto pidgeot rattata raticate spearow fearow ekans arbok pikachu raichu sandshrew sandslash nidoran-f nidorina nidoqueen nidoran-m nidorino nidoking clefairy clefable vulpix ninetales jigglypuff wigglytuff zubat golbat oddish gloom vileplume paras parasect venonat venomoth diglett dugtrio meowth persian psyduck golduck mankey primeape growlithe arcanine poliwag poliwhirl poliwrath abra kadabra alakazam machop machoke machamp bellsprout weepinbell victreebel tentacool tentacruel geodude graveler golem ponyta rapidash slowpoke slowbro magnemite magneton farfetchd doduo dodrio seel dewgong grimer muk shellder cloyster gastly haunter gengar onix drowzee hypno krabby kingler voltorb electrode exeggcute exeggutor cubone marowak hitmonlee hitmonchan lickitung koffing weezing rhyhorn rhydon chansey tangela kangaskhan horsea seadra goldeen seaking staryu starmie mr-mime scyther jynx electabuzz magmar pinsir tauros magikarp gyarados lapras ditto eevee vaporeon jolteon flareon porygon omanyte omastar kabuto kabutops aerodactyl snorlax articuno zapdos moltres dratini dragonair dragonite mewtwo mew`,
@@ -145,36 +149,70 @@ async function push(){
     note(p.ok?'Zapisano w GitHub ✓':'Błąd zapisu ('+p.status+'). Sprawdź token i repozytorium.');
   }catch(e){note('Błąd sieci')}
 }
+const SH={};let pt;
 async function pull(){
   const r=gh();if(!r)return;
   try{
-    const l=await fetch(`https://api.github.com/repos/${r}/contents/osoby`,{headers:hd()});if(!l.ok)return;
+    const l=await fetch(`https://api.github.com/repos/${r}/contents/osoby`,{headers:hd()});if(!l.ok)return;let ch=0;
     for(const f of await l.json()){
-      if(!f.name.endsWith('.json'))continue;
+      if(!f.name.endsWith('.json')||SH[f.name]===f.sha)continue;
+      SH[f.name]=f.sha;
       const n=decodeURIComponent(f.name.slice(0,-5));
       const d=await(await fetch(f.download_url+'?t='+Date.now())).json();
-      if(n!==me||!Object.keys(own).length)P[n]=d;
+      if((n!==me||!Object.keys(own).length)&&JSON.stringify(P[n])!==JSON.stringify(d)){P[n]=d;ch=1}
     }
-    if(!P[me])P[me]={};own=P[me];persist();render();
+    if(!P[me])P[me]={};own=P[me];if(ch){persist();render();if($('p').classList.contains('o')&&pm==='osoby')panel()}
   }catch(e){}
 }
+let pm='osoby';
 function panel(){
-  $('pb2').innerHTML=`<h1>Osoby</h1><div class="mut">Aktualnie: <b>${esc(me)}</b>. Dotknij osoby, aby zobaczyć jej kolekcję.</div>`
-  +Object.keys(P).sort().map(n=>`<button class="pp${n===me?' y':''}" data-n="${esc(n)}"><span>${esc(n)}</span><span class="mut">${Object.keys(P[n]).length}/${T}</span></button>`).join('')
-  +`<input id="nn" placeholder="Nowa osoba – wpisz imię" style="margin-top:10px"><button class="btn" id="add" style="width:100%;margin-top:6px">➕ Dodaj osobę</button>
-  <h1 style="font-size:16px;margin-top:16px">Zapis w GitHub (wspólny dla wszystkich)</h1>
-  <input id="rp" placeholder="uzytkownik/repozytorium" value="${esc(gh())}"><input id="tk" type="password" placeholder="Token GitHub" value="${esc(tok())}" style="margin-top:6px">
-  <button class="btn" id="sv" style="width:100%;margin-top:6px">Zapisz ustawienia i wczytaj osoby</button><p class="mut" id="pn"></p><button class="btn" id="pc" style="width:100%">Zamknij</button>`;
+  if(pm==='login'){
+    $('pb2').innerHTML=`<h1>Logowanie do GitHub</h1><div class="mut">Wspólna baza dla wszystkich osób. Podaj repozytorium i token, potem dotknij „Zaloguj”. Dane zostaną wczytane dopiero po poprawnym zalogowaniu. <b>Tryb: ${tok()?'odczyt i zapis w GitHub':'tylko odczyt'}</b></div>
+    <input id="rp" placeholder="uzytkownik/repozytorium" value="${esc(gh())}" style="margin-top:10px"><input id="tk" type="password" placeholder="Token GitHub" value="${esc(tok())}" style="margin-top:6px">
+    <button class="btn" id="sv" style="width:100%;margin-top:10px">🔑 Zaloguj i wczytaj osoby</button><p class="mut" id="pn"></p><button class="btn" id="pc" style="width:100%">Zamknij</button>`;
+  }else{
+    $('pb2').innerHTML=`<h1>Osoby</h1><div class="mut">Aktualnie: <b>${esc(me)}</b>. Dotknij osoby, aby zobaczyć jej kolekcję.</div>`
+    +Object.keys(P).sort().map(n=>`<button class="pp${n===me?' y':''}" data-n="${esc(n)}"><span>${esc(n)}</span><span class="mut">${Object.keys(P[n]).length}/${T}</span></button>`).join('')
+    +`<button class="btn" id="add" style="width:100%;margin-top:10px">➕ Dodaj nową osobę</button><button class="btn" id="pc" style="width:100%;margin-top:6px">Zamknij</button>`;
+  }
 }
-$('pk').onclick=()=>{panel();$('p').classList.add('o')};
+const openP=m=>{pm=m;panel();$('p').classList.add('o')};
+$('pk').onclick=()=>openP('osoby');
+$('lk').onclick=()=>openP('login');
+function addDlg(){
+  $('db').innerHTML=`<h1 style="font-size:18px;margin:0 0 10px">Nowa osoba</h1><input id="nn" placeholder="Imię lub nazwa" maxlength="30"><div style="display:flex;gap:8px;margin-top:10px"><button class="btn" id="dc" style="flex:1">Anuluj</button><button class="btn" id="dok" style="flex:1;background:var(--ac);color:#fff;border-color:var(--ac)">Dodaj</button></div>`;
+  $('d').classList.add('o');$('nn').focus();
+}
+function addPerson(){
+  const n=$('nn').value.trim().replace(/[\/\\?#%:*"<>|]/g,'').slice(0,30);if(!n)return;
+  if(!P[n])P[n]={};me=n;own=P[n];label();save();$('d').classList.remove('o');panel();render();
+}
+$('d').onclick=e=>{const id=e.target.id;if(id==='d'||id==='dc')$('d').classList.remove('o');if(id==='dok')addPerson()};
+$('d').onkeydown=e=>{if(e.key==='Enter')addPerson()};
 $('p').onclick=async e=>{
   const t=e.target;
   if(t.id==='p')return $('p').classList.remove('o');
   const b=t.closest('.pp');
   if(b){me=b.dataset.n;own=P[me];persist();label();panel();render();return}
-  if(t.id==='add'){const n=$('nn').value.trim().replace(/[\/\\?#%:*"<>|]/g,'').slice(0,30);if(!n)return;if(!P[n])P[n]={};me=n;own=P[n];label();save();panel();render();return}
-  if(t.id==='sv'){localStorage.setItem('repo',$('rp').value.trim());localStorage.setItem('tok',$('tk').value.trim());note('Wczytuję…');await pull();panel();note('Gotowe');return}
+  if(t.id==='add')return addDlg();
+  if(t.id==='sv'){
+    const r=$('rp').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/+$/,''),k=$('tk').value.trim();
+    if(!/^[\w.-]+\/[\w.-]+$/.test(r)||!k){note('Podaj repozytorium (użytkownik/repozytorium) i token.');return}
+    note('Sprawdzam…');
+    try{
+      const x=await fetch('https://api.github.com/repos/'+r,{headers:{Authorization:'Bearer '+k}});
+      if(!x.ok){note(x.status===401?'Nieprawidłowy token.':x.status===404?'Nie znaleziono repozytorium albo token nie ma do niego dostępu.':'Błąd GitHub ('+x.status+').');return}
+      const j=await x.json();
+      localStorage.setItem('repo',r);localStorage.setItem('tok',k);
+      for(const q in SH)delete SH[q];
+      await pull();auto();panel();
+      note('Zalogowano ✓ '+(j.permissions&&!j.permissions.push?'(token bez prawa zapisu – tylko odczyt). ':'')+'Wczytano osoby: '+Object.keys(P).length);
+    }catch(e){note('Brak połączenia z GitHub.')}
+    return;
+  }
   if(t.id==='pc')$('p').classList.remove('o');
 };
-render();label();pull();
+function auto(){clearInterval(pt);if(gh())pt=setInterval(()=>{if(!document.hidden)pull()},tok()?20000:90000)}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull()});
+render();label();pull();auto();
 </script></body></html>
