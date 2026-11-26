@@ -8,7 +8,7 @@
 :root[data-theme="dark"]{--bg:#14141a;--fg:#ececf2;--card:#21212b;--mut:#9a9aaa;--on:#4a2218;--bd:#33333f;color-scheme:dark}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:12px 12px 84px}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:12px 12px 24px}
 h1{font-size:20px;margin:0 0 4px}
 .bar{height:8px;background:var(--bd);border-radius:4px;overflow:hidden;margin:6px 0 10px}
 .bar i{display:block;height:100%;background:var(--ac);width:0}
@@ -22,15 +22,12 @@ input{width:100%;padding:11px 12px;border:1px solid var(--bd);border-radius:10px
 .d{display:flex;justify-content:center;gap:3px;margin-top:5px}
 .d u{text-decoration:none;font-size:10px;width:17px;height:17px;line-height:17px;border-radius:50%;background:var(--bd);color:var(--mut)}
 .d u.y{background:var(--ac);color:#fff}
-nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
-nav button{flex:1;padding:14px 0;border:0;background:none;color:var(--mut);font-size:15px}
-nav button.a{color:var(--ac);font-weight:600}
 video{width:100%;max-height:55vh;background:#000;border-radius:12px;object-fit:cover}
 .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--fg);font-size:15px}
 #m{position:fixed;inset:0;background:#0007;display:none;align-items:flex-end;justify-content:center;z-index:5}
 #m.o{display:flex}
 #sh{background:var(--card);width:100%;height:100%;overflow:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(18px + env(safe-area-inset-bottom,0px))}
-#ts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(80px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:20px;z-index:9;display:none;max-width:90%;text-align:center}
+#ts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:20px;z-index:9;display:none;max-width:90%;text-align:center}
 .v{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:8px;padding:14px;border-radius:12px;border:2px solid var(--bd);background:var(--bg);color:var(--fg);font-size:16px}
 .v.y{border-color:var(--ac);background:var(--on)}
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px}.top h1{margin:0}
@@ -42,24 +39,29 @@ video{width:100%;max-height:55vh;background:#000;border-radius:12px;object-fit:c
 #d{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:7;padding:16px}
 #d.o{display:flex}
 #db{background:var(--card);border-radius:16px;padding:18px;width:100%;max-width:360px}
+.hd{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--bg);padding:8px 0;margin-bottom:4px}
+.hd h1{font-size:22px;white-space:nowrap}
+.tb{display:flex;gap:5px;align-items:center}
+.tab{padding:10px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--mut);font-size:15px}
+.tab.a{color:var(--ac);font-weight:600;background:var(--on);border-color:var(--ac)}
+.tx,#me{display:none}
+.hd .tab,.hd .btn{width:48px;height:48px;padding:0;border-radius:8px;font-size:24px;display:flex;align-items:center;justify-content:center}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
 .hide{display:none}
 .mut{color:var(--mut);font-size:13px}
 </style></head><body>
+<header class="top hd"><h1>PokéKolekcja</h1><div class="tb"><button class="tab a" id="n0" title="Kolekcja">📚<span class="tx"> Kolekcja</span></button><button class="tab" id="n1" title="Skanuj">📷<span class="tx"> Skanuj</span></button><button class="btn" id="pk" title="Osoby">👤 <span id="me"></span></button><button class="btn" id="lk" title="Logowanie">🔑</button></div></header>
 <section id="c">
-<div class="top"><h1>PokéKolekcja</h1><div style="display:flex;gap:6px"><button class="btn" id="pk">👤 <span id="me"></span></button><button class="btn" id="lk">🔑</button></div></div>
 <div id="cnt" class="mut"></div><div class="bar"><i id="pb"></i></div>
 <input id="q" placeholder="Szukaj nazwy lub numeru" autocomplete="off">
 <div class="grid" id="g"></div>
 </section>
 <section id="s" class="hide">
 <h1>Skanuj kartę</h1>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><button class="btn" id="cb">📷 Zezwól na aparat</button><button class="btn" id="sw">🔄 Zmień kamerę</button><button class="btn hide" id="ob">↗ Otwórz w pełnej karcie</button></div>
 <video id="v" playsinline muted></video>
 <p id="msg" class="mut"></p>
-<button class="btn" id="cb">📷 Zezwól na aparat</button> <button class="btn hide" id="ob">↗ Otwórz w pełnej karcie</button> <button class="btn" id="sw">🔄 Zmień kamerę</button>
-<input id="f" placeholder="Albo wpisz nazwę Pokémona" autocomplete="off" style="margin-top:10px">
-<div class="grid" id="fr"></div>
 </section>
-<nav><button id="n0" class="a">📚 Kolekcja</button><button id="n1">📷 Skanuj</button></nav>
 <div id="m"><div id="sh"></div></div>
 <div id="p"><div id="pb2"></div></div>
 <div id="d"><div id="db"></div></div>
@@ -122,11 +124,9 @@ $('sh').onclick=e=>{
 };
 $('m').onclick=e=>{if(e.target.id==='m')close()};
 $('g').onclick=e=>{const t=e.target.closest('.t');if(t)open(+t.dataset.i)};
-$('fr').onclick=e=>{const t=e.target.closest('.t');if(t)open(+t.dataset.i)};
 $('q').oninput=render;
-$('f').oninput=()=>{const v=$('f').value;$('fr').innerHTML=v.trim()?match(v).slice(0,8).map(tile).join(''):''};
 let tab=0,stream,facing='environment',timer;
-function show(t){tab=t;$('c').classList.toggle('hide',t!==0);$('s').classList.toggle('hide',t!==1);$('n0').className=t?'':'a';$('n1').className=t?'a':'';if(t){perm()}else{stop();render()}}
+function show(t){tab=t;$('c').classList.toggle('hide',t!==0);$('s').classList.toggle('hide',t!==1);$('n0').className='tab'+(t?'':' a');$('n1').className='tab'+(t?' a':'');if(t){perm()}else{stop();render()}}
 $('n0').onclick=()=>show(0);$('n1').onclick=()=>show(1);
 function stop(){clearInterval(timer);if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
 async function perm(){let s='prompt';try{s=(await navigator.permissions.query({name:'camera'})).state}catch(e){}
@@ -136,8 +136,8 @@ async function start(){
   try{
     stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing}});
     v.srcObject=stream;await v.play();
-  }catch(e){msg.textContent='Kamera nie działa ('+e.name+'). Otwórz stronę w samej przeglądarce Chrome (nie w aplikacji), zezwól na kamerę w ustawieniach witryny i dotknij „Zezwól na aparat”. Możesz też wpisać nazwę poniżej.';if(window.self!==window.top)$('ob').classList.remove('hide');return}
-  if(!('TextDetector' in window)){msg.textContent='Ta przeglądarka nie czyta tekstu z kamery. Wpisz nazwę poniżej (lub włącz „Experimental Web Platform features” w chrome://flags).';return}
+  }catch(e){msg.textContent='Kamera nie działa ('+e.name+'). Otwórz stronę w samej przeglądarce Chrome (nie w aplikacji), zezwól na kamerę w ustawieniach witryny i dotknij „Zezwól na aparat”. Możesz też wyszukać Pokémona w zakładce Kolekcja.';if(window.self!==window.top)$('ob').classList.remove('hide');return}
+  if(!('TextDetector' in window)){msg.textContent='Ta przeglądarka nie czyta tekstu z kamery. Wyszukaj Pokémona w zakładce Kolekcja (lub włącz „Experimental Web Platform features” w chrome://flags).';return}
   msg.textContent='Pokaż kartę z widoczną nazwą Pokémona…';
   const d=new TextDetector();
   timer=setInterval(async()=>{try{const r=await d.detect(v);const i=find(r.map(x=>x.rawValue).join(' '));if(i)open(i)}catch(e){}},700);
