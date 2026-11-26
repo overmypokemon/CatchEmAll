@@ -168,14 +168,18 @@ async function pull(){
   const r=gh();if(!r)return;
   try{
     const l=await fetch(`https://api.github.com/repos/${r}/contents/osoby`,{headers:hd()});if(!l.ok)return;let ch=0;
-    for(const f of await l.json()){
+    const L=await l.json(),rn=new Set(L.filter(f=>f.name.endsWith('.json')).map(f=>decodeURIComponent(f.name.slice(0,-5))));
+    for(const f of L){
       if(!f.name.endsWith('.json')||SH[f.name]===f.sha)continue;
       SH[f.name]=f.sha;
       const n=decodeURIComponent(f.name.slice(0,-5));
       const d=await(await fetch(f.download_url+'?t='+Date.now())).json();
       if((n!==me||!Object.keys(own).length)&&JSON.stringify(P[n])!==JSON.stringify(d)){P[n]=d;ch=1}
     }
-    if(!P[me])P[me]={};own=P[me];if(ch){persist();render();if($('p').classList.contains('o')&&pm==='osoby')panel()}
+    for(const n of Object.keys(P))if(!rn.has(n)&&!(n===me&&Object.keys(own).length)){delete P[n];ch=1}
+    for(const k in SH)if(!rn.has(decodeURIComponent(k.slice(0,-5))))delete SH[k];
+    if(!P[me]){me=Object.keys(P).sort()[0]||'Ja';if(!P[me])P[me]={};ch=1}
+    own=P[me];label();if(ch){persist();render();if($('p').classList.contains('o')&&pm==='osoby')panel()}
   }catch(e){}
 }
 let pm='osoby';
