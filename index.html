@@ -40,7 +40,7 @@ video{width:100%;max-height:55vh;background:#000;border-radius:12px;object-fit:c
 #d.o{display:flex}
 #db{background:var(--card);border-radius:16px;padding:18px;width:100%;max-width:360px}
 .hd{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--bg);padding:4px 0 8px;margin-bottom:4px}
-.wb{font-size:14px;line-height:22px;color:var(--mut);text-align:center}
+.wb{margin-top:4px;font-size:14px;line-height:22px;color:var(--mut);text-align:center}
 .wb b{color:var(--ac)}
 .hd h1{font-size:22px;white-space:nowrap}
 .tb{display:flex;gap:5px;align-items:center}
@@ -49,14 +49,19 @@ video{width:100%;max-height:55vh;background:#000;border-radius:12px;object-fit:c
 .tx,#me{display:none}
 .hd .tab,.hd .btn{width:48px;height:48px;padding:0;border-radius:8px;font-size:24px;display:flex;align-items:center;justify-content:center}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
-.sb{position:sticky;top:calc(var(--hh,92px) + env(safe-area-inset-top,0px));z-index:3;background:var(--bg);padding-bottom:8px}
+.r3{display:flex;gap:8px;align-items:center;margin-top:6px}
+.cn{flex:1 1 0;min-width:64px}
+.cn .mut{font-size:12px;line-height:15px}
+.cn .bar{margin:3px 0 0;height:6px}
+.hd .top .wb{flex:1;min-width:0;margin:0;font-size:12px;line-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:460px){.hd h1{font-size:18px}.hd .tab,.hd .btn{width:40px;height:40px;font-size:20px}.tb{gap:4px}}
+.r3 input{flex:1 1 0;width:auto;min-width:64px;padding:8px 10px;font-size:14px}
+.sc .cn,.sc #q{display:none}
 .hide{display:none}
 .mut{color:var(--mut);font-size:13px}
 </style></head><body>
-<header class="hd"><div id="who" class="wb"></div><div class="top"><h1>PokéKolekcja</h1><div class="tb"><button class="tab a" id="n0" title="Kolekcja">📚<span class="tx"> Kolekcja</span></button><button class="tab" id="n1" title="Skanuj">📷<span class="tx"> Skanuj</span></button><button class="btn" id="pk" title="Osoby">👤 <span id="me"></span></button><button class="btn" id="lk" title="Logowanie">🔑</button></div></div></header>
+<header class="hd"><div class="top"><h1>PokéKolekcja</h1><div id="who" class="wb"></div><div class="tb"><button class="tab a" id="n0" title="Kolekcja">📚<span class="tx"> Kolekcja</span></button><button class="tab" id="n1" title="Skanuj">📷<span class="tx"> Skanuj</span></button><button class="btn" id="pk" title="Osoby">👤 <span id="me"></span></button><button class="btn" id="lk" title="Logowanie">🔑</button></div></div><div class="r3"><div class="cn"><div id="cnt" class="mut"></div><div class="bar"><i id="pb"></i></div></div><input id="q" placeholder="Szukaj" autocomplete="off"></div></header>
 <section id="c">
-<div class="sb"><div id="cnt" class="mut"></div><div class="bar"><i id="pb"></i></div>
-<input id="q" placeholder="Szukaj nazwy lub numeru" autocomplete="off"></div>
 <div class="grid" id="g"></div>
 </section>
 <section id="s" class="hide">
@@ -98,7 +103,7 @@ function find(t){t=t.toLowerCase();const tk=new Set(t.match(/[a-z]+/g)||[]),j=t.
 function tile(i){const o=own[i]?' on':'';return `<button class="t${o}" data-i="${i}"><img loading="lazy" alt="" src="${th(i)}" onerror="this.style.visibility='hidden'"><b>#${i}</b><span>${cap(N[i-1])}</span><div class="d">${S.map((s,v)=>`<u class="${has(i,v)?'y':''}">${s}</u>`).join('')}</div></button>`}
 function match(q){q=q.trim().toLowerCase();const r=[];for(let i=1;i<=T;i++)if(!q||String(i)===q||N[i-1].replace(/-/g,' ').includes(q))r.push(i);return r}
 function render(){
-  const n=Object.keys(own).length;$('cnt').textContent=`Zebrane: ${n} / ${T}`;$('pb').style.width=(n/T*100)+'%';
+  const n=Object.keys(own).length;$('cnt').innerHTML=`Zebrane<br><b>${n} / ${T}</b>`;$('pb').style.width=(n/T*100)+'%';
   $('g').innerHTML=match($('q').value).map(tile).join('');
 }
 let dr=0;
@@ -129,7 +134,7 @@ $('m').onclick=e=>{if(e.target.id==='m')close()};
 $('g').onclick=e=>{const t=e.target.closest('.t');if(t)open(+t.dataset.i)};
 $('q').oninput=render;
 let tab=0,stream,facing='environment',timer;
-function show(t){tab=t;$('c').classList.toggle('hide',t!==0);$('s').classList.toggle('hide',t!==1);$('n0').className='tab'+(t?'':' a');$('n1').className='tab'+(t?' a':'');if(t){perm()}else{stop();render()}}
+function show(t){tab=t;document.querySelector('.hd').classList.toggle('sc',t===1);$('c').classList.toggle('hide',t!==0);$('s').classList.toggle('hide',t!==1);$('n0').className='tab'+(t?'':' a');$('n1').className='tab'+(t?' a':'');if(t){perm()}else{stop();render()}}
 $('n0').onclick=()=>show(0);$('n1').onclick=()=>show(1);
 function stop(){clearInterval(timer);if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
 async function perm(){let s='prompt';try{s=(await navigator.permissions.query({name:'camera'})).state}catch(e){}
@@ -147,7 +152,7 @@ async function start(){
 }
 $('cb').onclick=start;$('ob').onclick=()=>window.open(location.href,'_blank');$('sw').onclick=()=>{facing=facing==='environment'?'user':'environment';start()};
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const label=()=>{$('me').textContent=me;$('who').innerHTML='Przeglądasz kolekcję: <b>'+esc(me)+'</b>'};
+const label=()=>{$('me').textContent=me;$('who').innerHTML='Kolekcja:<br><b>'+esc(me)+'</b>'};
 let tt;function toast(t){const e=$('ts');e.textContent=t;e.style.display='block';clearTimeout(tt);tt=setTimeout(()=>e.style.display='none',2500)}
 const note=t=>{const e=$('pn');if(e)e.textContent=t;else toast(t)};
 const who=i=>{const o=Object.keys(P).filter(n=>n!==me&&P[n][i]).map(n=>esc(n)+': '+V.filter((_,k)=>(P[n][i]>>k)&1).join(', '));return o.length?'Mają: '+o.join(' · '):'Nikt inny jeszcze tego nie ma'};
@@ -236,6 +241,6 @@ $('p').onclick=async e=>{
 function auto(){clearInterval(pt);if(gh())pt=setInterval(()=>{if(!document.hidden)pull()},tok()?20000:90000)}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull()});
 const hdr=document.querySelector('.hd');
-new ResizeObserver(()=>document.documentElement.style.setProperty('--hh',hdr.offsetHeight+'px')).observe(hdr);
+new ResizeObserver(()=>document.documentElement.style.setProperty('--hh',hdr.getBoundingClientRect().height+'px')).observe(hdr);
 render();label();pull();auto();
 </script></body></html>
