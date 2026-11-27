@@ -99,9 +99,26 @@ const has=(i,v)=>((own[i]||0)>>v)&1;
 const $=id=>document.getElementById(id);
 const K={};N.forEach((n,i)=>{const k=n.replace(/-/g,'');if(!K[k])K[k]=i+1});
 K.nidoran=29;
-function find(t){t=t.toLowerCase();const tk=new Set(t.match(/[a-z]+/g)||[]),j=t.replace(/[^a-z]/g,'');let bk='';for(const k in K)if((tk.has(k)||(k.length>5&&j.includes(k)))&&k.length>bk.length)bk=k;return bk?K[bk]:0}
+const nz=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+let AL={};try{AL=JSON.parse(localStorage.getItem('al')||'{}')}catch(e){}
+const KF={};
+function addK(){for(const id in AL)for(const n of AL[id].split('|')){const k=n.replace(/[^a-z]/g,'');if(k.length>=5&&!K[k]&&!KF[k])KF[k]=+id}}
+async function loadAL(){
+  if(Object.keys(AL).length>1000)return;
+  try{
+    const t=await(await fetch('https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon_species_names.csv')).text();
+    const m={};
+    for(const l of t.split('\n').slice(1)){
+      const c=l.match(/^(\d+),(\d+),("(?:[^"]|"")*"|[^,]*)/);if(!c)continue;
+      const id=+c[1];if(id>T)continue;
+      const n=c[3].replace(/^"|"$/g,'');if(n)m[id]=(m[id]||'')+'|'+nz(n);
+    }
+    if(Object.keys(m).length>1000){AL=m;try{localStorage.setItem('al',JSON.stringify(m))}catch(e){}}
+  }catch(e){}
+}
+function find(t){t=nz(t);const tk=new Set(t.match(/[a-z]+/g)||[]),j=t.replace(/[^a-z]/g,'');let bk='';for(const k in K)if((tk.has(k)||(k.length>5&&j.includes(k)))&&k.length>bk.length)bk=k;if(!bk){for(const w of tk)if(KF[w])return KF[w]}return bk?K[bk]:0}
 function tile(i){const o=own[i]?' on':'';return `<button class="t${o}" data-i="${i}"><img loading="lazy" alt="" src="${th(i)}" onerror="this.style.visibility='hidden'"><b>#${i}</b><span>${cap(N[i-1])}</span><div class="d">${S.map((s,v)=>`<u class="${has(i,v)?'y':''}">${s}</u>`).join('')}</div></button>`}
-function match(q){q=q.trim().toLowerCase();const r=[];for(let i=1;i<=T;i++)if(!q||String(i)===q||N[i-1].replace(/-/g,' ').includes(q))r.push(i);return r}
+function match(q){q=nz(q.trim());const r=[];for(let i=1;i<=T;i++)if(!q||String(i)===q||N[i-1].replace(/-/g,' ').includes(q)||(AL[i]||'').includes(q))r.push(i);return r}
 function render(){
   const n=Object.keys(own).length;$('cnt').innerHTML=`Zebrane<br><b>${n} / ${T}</b>`;$('pb').style.width=(n/T*100)+'%';
   $('g').innerHTML=match($('q').value).map(tile).join('');
@@ -242,5 +259,6 @@ function auto(){clearInterval(pt);if(gh())pt=setInterval(()=>{if(!document.hidde
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull()});
 const hdr=document.querySelector('.hd');
 new ResizeObserver(()=>document.documentElement.style.setProperty('--hh',hdr.getBoundingClientRect().height+'px')).observe(hdr);
+addK();loadAL().then(()=>{addK();render()});
 render();label();pull();auto();
 </script></body></html>
