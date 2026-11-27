@@ -39,7 +39,9 @@ video{width:100%;max-height:55vh;background:#000;border-radius:12px;object-fit:c
 #d{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:7;padding:16px}
 #d.o{display:flex}
 #db{background:var(--card);border-radius:16px;padding:18px;width:100%;max-width:360px}
-.hd{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--bg);padding:8px 0;margin-bottom:4px}
+.hd{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--bg);padding:4px 0 8px;margin-bottom:4px}
+.wb{font-size:14px;line-height:22px;color:var(--mut);text-align:center}
+.wb b{color:var(--ac)}
 .hd h1{font-size:22px;white-space:nowrap}
 .tb{display:flex;gap:5px;align-items:center}
 .tab{padding:10px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--mut);font-size:15px}
@@ -47,11 +49,11 @@ video{width:100%;max-height:55vh;background:#000;border-radius:12px;object-fit:c
 .tx,#me{display:none}
 .hd .tab,.hd .btn{width:48px;height:48px;padding:0;border-radius:8px;font-size:24px;display:flex;align-items:center;justify-content:center}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
-.sb{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:3;background:var(--bg);padding-bottom:8px}
+.sb{position:sticky;top:calc(var(--hh,92px) + env(safe-area-inset-top,0px));z-index:3;background:var(--bg);padding-bottom:8px}
 .hide{display:none}
 .mut{color:var(--mut);font-size:13px}
 </style></head><body>
-<header class="top hd"><h1>PokéKolekcja</h1><div class="tb"><button class="tab a" id="n0" title="Kolekcja">📚<span class="tx"> Kolekcja</span></button><button class="tab" id="n1" title="Skanuj">📷<span class="tx"> Skanuj</span></button><button class="btn" id="pk" title="Osoby">👤 <span id="me"></span></button><button class="btn" id="lk" title="Logowanie">🔑</button></div></header>
+<header class="hd"><div id="who" class="wb"></div><div class="top"><h1>PokéKolekcja</h1><div class="tb"><button class="tab a" id="n0" title="Kolekcja">📚<span class="tx"> Kolekcja</span></button><button class="tab" id="n1" title="Skanuj">📷<span class="tx"> Skanuj</span></button><button class="btn" id="pk" title="Osoby">👤 <span id="me"></span></button><button class="btn" id="lk" title="Logowanie">🔑</button></div></div></header>
 <section id="c">
 <div class="sb"><div id="cnt" class="mut"></div><div class="bar"><i id="pb"></i></div>
 <input id="q" placeholder="Szukaj nazwy lub numeru" autocomplete="off"></div>
@@ -145,7 +147,7 @@ async function start(){
 }
 $('cb').onclick=start;$('ob').onclick=()=>window.open(location.href,'_blank');$('sw').onclick=()=>{facing=facing==='environment'?'user':'environment';start()};
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const label=()=>{$('me').textContent=me};
+const label=()=>{$('me').textContent=me;$('who').innerHTML='Przeglądasz kolekcję: <b>'+esc(me)+'</b>'};
 let tt;function toast(t){const e=$('ts');e.textContent=t;e.style.display='block';clearTimeout(tt);tt=setTimeout(()=>e.style.display='none',2500)}
 const note=t=>{const e=$('pn');if(e)e.textContent=t;else toast(t)};
 const who=i=>{const o=Object.keys(P).filter(n=>n!==me&&P[n][i]).map(n=>esc(n)+': '+V.filter((_,k)=>(P[n][i]>>k)&1).join(', '));return o.length?'Mają: '+o.join(' · '):'Nikt inny jeszcze tego nie ma'};
@@ -233,5 +235,7 @@ $('p').onclick=async e=>{
 };
 function auto(){clearInterval(pt);if(gh())pt=setInterval(()=>{if(!document.hidden)pull()},tok()?20000:90000)}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull()});
+const hdr=document.querySelector('.hd');
+new ResizeObserver(()=>document.documentElement.style.setProperty('--hh',hdr.offsetHeight+'px')).observe(hdr);
 render();label();pull();auto();
 </script></body></html>
